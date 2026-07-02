@@ -6,14 +6,16 @@ All runs: 2026-07-02, Claude Code on Windows 11, model `claude-fable-5`, session
 
 The fixture has 2 planted bugs (off-by-one crash at line 5, division-by-zero at line 20) plus 1 unplanted exotic issue (prototype-chain lookup in `applyDiscount`) that a max-effort review can find.
 
-| Arm | Output tokens | Δ | Cost | Time | Bugs found |
+| Arm | Output tokens | Δ | Cost | Time | Issues found (2 planted + 1 unplanted possible) |
 |---|---:|---:|---:|---:|---|
 | No skill, effort max | 1,096 | — | $0.264 | 30s | 3/3 |
-| Skill v1, effort max | 403 | −63% | $0.204 | 15s | 2/2 planted |
+| Skill v1, effort max | 403 | −63% | $0.204 | 15s | 2/2 planted, missed unplanted |
 | **Skill v2, effort max** | **531** | **−52%** | $0.208 | 17s | **3/3 — full parity** |
 | Effort probe (`effort: low` frontmatter only, no rules) | 505 | −54% | $0.240 | 22s | 2/2 planted + partial 3rd |
-| Skill v1 + `--effort medium` (CLI flag) | 297 | −73% | $0.253 | 10s | 2/2 planted |
-| **Eco variant (rules + `effort: low`)** | **279** | **−75%** | $0.185 | 16s | 2/2 planted |
+| Skill v1 + `--effort medium` (CLI flag) | 297 | −73% | $0.253 | 10s | 2/2 planted, missed unplanted |
+| **Eco variant (rules + `effort: low`)** | **279** | **−75%** | $0.185 | 16s | 2/2 planted, missed unplanted |
+
+**Grading criteria** (fixed before the runs): an arm scores a planted bug if it identifies the faulty line AND the failure mode (crash / NaN); the unplanted third issue (prototype-chain lookup in `applyDiscount`) is graded as bonus depth, not a pass/fail item, since it was not deliberately planted. Fix-task arms are graded by executing the fixed module with Node against fixed inputs — pass requires identical, correct behavior. Where an arm missed the unplanted issue the table says so explicitly.
 
 Notable: the `effort:` frontmatter probe proves the override works on inline skill invocation — 54% fewer output tokens with **zero** behavioral instructions.
 
@@ -52,6 +54,17 @@ Fixture: `tasks/bigproject/` — a 12-file in-memory e-commerce service (routes/
 - Input side moved the same direction: ~649k cumulative cache-read tokens (baseline) vs ~390k (skill) — fewer, more targeted reads.
 - Honest nuance: the unrestricted baseline volunteered extra observations (an unenforced config constant, a float-vs-cents design critique) — genuinely interesting, unasked, and each billed. That is precisely the dial this skill turns.
 
+## Task 6 — Variance study, n=5 per arm (same review task as Task 1)
+
+Run after the v1.1 skill update (adds the "flag correctness-critical findings even unasked" rule — inert on this task, where bugs are explicitly requested). Five sequential runs per arm at the default effort level, no parallel cache races.
+
+| Arm | Runs (output tokens) | Mean | Range | Planted bugs | Unplanted bonus issue |
+|---|---|---:|---:|---|---|
+| Baseline | 937, 824, 894, 933, 866 | **891** | 824–937 | 5/5 both found | 5/5 found |
+| /eco | 316, 310, 380, 314, 318 | **328** | 310–380 | 5/5 both found | 0/5 found |
+
+**Savings: −63% mean, worst-case pairing −54%, best −67%.** Consistency is the point: every single run of both arms found both planted bugs; the spread within each arm (±6% baseline, ±11% eco) is far smaller than the gap between arms. The honest nuance: at this effort level the baseline reliably volunteers the unplanted edge case and eco reliably doesn't — volunteered depth is what the token savings buy. When such an observation is correctness-critical, the v1.1 quality floor requires eco to flag it in one line (verified on the trivial-question task, `raw/triv2.json`).
+
 ## Task 5 — Cross-model check (same review task as Task 1)
 
 | Model | Arm | Output tokens | Δ | Cost | Planted bugs |
@@ -67,7 +80,7 @@ The Haiku row is a **negative result and we're keeping it**: Haiku's baseline is
 
 ## Methodology & caveats
 
-- **n = 1 per cell.** Single-shot runs; LLM output varies between runs. Treat percentages as effect sizes, not lab constants. The direction and rough magnitude were consistent across all 23 runs (Haiku being the honest exception, documented above).
+- **Most cells are n = 1** (single-shot runs; treat percentages as effect sizes, not lab constants) — except the flagship review task, which has a dedicated n=5-per-arm variance study (Task 6). The direction and rough magnitude were consistent across all 35 runs (Haiku being the honest exception, documented above).
 - Several arms ran **in parallel**, which races prompt-cache population between processes — `total_cost_usd` is therefore noisier than `output_tokens` (which is unaffected). The [run scripts](run.ps1) execute arms sequentially for cleaner cost numbers.
 - One-shot sessions carry a fixed overhead (~45–50k cached input tokens: system prompt, tools, skill descriptions) that dominates single-run cost. In real multi-turn sessions the per-turn output savings compound while the fixed overhead amortizes — the percentages above are conservative for long sessions.
 - Auto-memory was disabled during all v2 runs (headless mode loads project memory by default, which would have contaminated both arms).

@@ -11,6 +11,7 @@ Same outcomes, absolute minimum tokens. If brevity ever conflicts with correctne
 
 Rules (the /eco set):
 - Read code before changing it; never truncate deliverables — brevity applies to prose and process, not the work product.
+- If you notice a correctness-critical problem (crash, data loss, security hole), flag it in one line even if unasked. Suppress noise, never warnings.
 - Lead with the answer; no preamble, no restating the request, no recap. Aim for ≤6 lines of prose; never pad.
 - Never paste back content you just wrote with Edit/Write; cite `path:line`. Quote ≤5 lines when discussing code.
 - One solution, no alternatives, no header/table ceremony.

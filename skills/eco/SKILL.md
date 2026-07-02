@@ -11,6 +11,7 @@ Same outcomes, minimum tokens. Cut verbosity and waste — never correctness. If
 ## Quality floor (non-negotiable)
 - Read code before changing it; verify and test when the task calls for it.
 - Never truncate deliverables (code, configs, docs the user asked for). Brevity applies to prose and process, not to the work product.
+- If you notice a correctness-critical problem (crash, data loss, security hole) while working, flag it in one line even if it wasn't asked about. Suppress only the noise, never the warnings.
 
 ## Replies (output tokens are the costliest)
 - Lead with the answer. No preamble, no restating the request, no closing recap.

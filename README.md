@@ -1,10 +1,10 @@
 # claude-eco — eco mode for Claude Code, built for Claude Fable 5
 
-**−52% to −75% output tokens on real agentic tasks, with every fix executed and verified, and the raw data in the repo.**
+**Your Claude Code sessions are full of work you never asked for. I measured it, deleted it, and published every number — including the one where I lose.**
 
-*I measured what Claude Code wastes tokens on, then deleted it.*
+*`/eco`: −48% to −73% output tokens at full quality (all produced fixes executed and verified). `/eco-max`: up to −75% by dialing reasoning effort down — opt-in, labeled. Raw data in the repo.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)](https://code.claude.com/docs/en/skills) [![Benchmarks](https://img.shields.io/badge/benchmarks-23%20raw%20runs-success)](benchmarks/results.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)](https://code.claude.com/docs/en/skills) [![Benchmarks](https://img.shields.io/badge/benchmarks-35%20raw%20runs-success)](benchmarks/results.md)
 
 [Results](#measured-results) · [Install](#install) · [Usage](#usage) · [Benchmarks](benchmarks/results.md) · [FAQ](#faq)
 
@@ -17,21 +17,21 @@ Fable 5 at high effort re-reads files it just edited, pastes back diffs it alrea
 
 ## See the difference
 
-Same session, same question — `what does applyDiscount(100, 'SAVE10') return?` — verbatim answers from the benchmark runs ([raw](benchmarks/raw/)):
+Same question, identical settings, paired runs — `what does applyDiscount(100, 'SAVE10') return?` — verbatim answers ([raw JSONs](benchmarks/raw/)):
 
-**Without eco** (220 output tokens):
+**Without eco** (231-token answer):
 
 > `applyDiscount(100, 'SAVE10')` returns **90**.
 >
-> The lookup `discounts['SAVE10']` gives `pct = 10`, so the function computes `100 - (100 * 10) / 100 = 100 - 10 = 90`.
+> In `test/orders.js:11-16`, the code looks up `'SAVE10'` in the discounts map and gets `10` (percent), then computes `100 - (100 * 10) / 100 = 90`.
+
+**With /eco** (122-token answer):
+
+> `applyDiscount(100, 'SAVE10')` returns **90** — `SAVE10` maps to 10%, so `100 - (100*10)/100` (test/orders.js:15).
 >
-> Unrelated to your question, but worth noting: `calcTotal` at test\orders.js:5 has an off-by-one bug — the loop condition `i <= items.length` reads one past the end of the array, so `items[i]` is `undefined` on the last iteration and the function will throw (`Cannot read properties of undefined`). That would break `averageItemPrice` and `formatOrder` too, since both call it.
+> Unrelated bug noticed: `calcTotal` loops `i <= items.length` (test/orders.js:5), so it reads past the array and throws on `items[i].price`.
 
-**With /eco** (79 output tokens):
-
-> **90.** `SAVE10` maps to 10% (test\orders.js:12), so it returns `100 - (100 * 10) / 100` = 90.
-
-Same correct answer, 64% fewer tokens — repeated on every turn of every session.
+Half the tokens — and in this pair it's the *eco* answer carrying a critical warning, because the quality floor requires correctness-critical findings to be flagged in one line even when unasked. Suppress noise, never warnings. Individual runs vary (that's what the n=5 row below is for); the ratio is what holds.
 
 ## Measured results
 
@@ -39,12 +39,13 @@ Baseline = stock Claude Code, `claude-fable-5`, **max** effort, no CLAUDE.md, de
 
 | Task | Baseline | With /eco | Output tokens | Cost | Quality |
 |---|---:|---:|---:|---:|---|
-| Code review (find bugs) | 1,096 tok | 531 tok | **−52%** | −21% | 3/3 bugs both — full parity |
+| Code review (find bugs) | 1,096 tok | 531 tok | **−52%** | −21% | Both arms found all 3 issues (2 planted + 1 unplanted) — full parity |
 | Real editing (fix bugs) | 3,776 tok | 1,026 tok | **−73%** | −46% | Fixes verified functionally identical with Node |
 | Multi-file project, 3-turn session | 11,912 tok | 3,285 tok | **−72%** | −46% | Same root cause, same fix, tests pass |
-| Code review with /eco-max | 1,096 tok | 279 tok | **−75%** | −30% | 2/2 planted bugs |
+| Code review with /eco-max | 1,096 tok | 279 tok | **−75%** | −30% | 2/2 planted bugs; missed the 1 unplanted edge case — that's the effort tradeoff, and it's why eco-max is opt-in |
+| **Code review, n=5 variance study** (default effort) | 891 mean (824–937) | 328 mean (310–380) | **−63%** (−54% to −67%) | — | 5/5 runs: both planted bugs found by both arms. The unplanted bonus issue: baseline 5/5, eco 0/5 — volunteered depth is precisely what you trade |
 
-Don't take the table's word for it — run the same A/B on **your** task: `./benchmarks/run.sh "your task here"`. Full methodology, per-turn numbers and 23 raw JSONs: [benchmarks/results.md](benchmarks/results.md). The multi-turn row is the scale test: a 12-file codebase, one invocation in turn 1, and the mode held for the whole session while input-side reads dropped ~40%.
+Don't take the table's word for it — run the same A/B on **your** task: `./benchmarks/run.sh "your task here"`. Full methodology, grading criteria, per-turn numbers and 35 raw JSONs: [benchmarks/results.md](benchmarks/results.md). The multi-turn row is the scale test: a 12-file codebase, one invocation in turn 1, and the mode held for the whole session while input-side reads dropped ~40%.
 
 ## Install
 
@@ -66,6 +67,8 @@ git clone https://github.com/sup3x/claude-code-fable-eco; cd claude-code-fable-e
 
 **Project-only:** copy `skills/` into your repo's `.claude/skills/`. This is also what makes `/eco` available in Claude Code **web/mobile cloud sessions** — those only load skills from the repo, not from `~/.claude/skills/`.
 
+**Uninstall:** delete the `eco/` and `eco-max/` folders from your skills directory. `/eco setup` only ever writes plain `settings.json` keys (`effortLevel` and two `env` entries) — remove them to fully revert.
+
 ## Usage
 
 | Command | Effect |
@@ -75,9 +78,9 @@ git clone https://github.com/sup3x/claude-code-fable-eco; cd claude-code-fable-e
 | `/eco-max <task>` | Maximum savings: frugality rules **plus** low reasoning effort — for routine chores |
 | `/eco setup` | Propose permanent savings in `settings.json` — applies only after you confirm |
 
-Works in **any language** — the rules are English, the replies follow yours. No slash commands available (mobile app, web)? Just say it in plain words — "activate eco mode" in any language triggers the skill; verified. **Invoke once per session, not per question:** activation costs one turn plus ~1.3k cached input tokens, so for a single trivial question the overhead exceeds the savings (we measured that too). Activated early, every subsequent answer is ~3× smaller.
+Works in **any language** — the rules are English, the replies follow yours. No slash commands available (mobile app, web)? Just say it in plain words — "activate eco mode" triggers the skill (verified in English and Turkish). **Invoke once per session, not per question:** activation costs one turn plus ~1.2k input tokens once per session (skill body + descriptions, then cached), so for a single trivial question the overhead exceeds the savings (we measured that too). Activated early, every subsequent answer is ~2–4× smaller. One more honest caveat: if a very long session gets context-compacted, the rules may be summarized away — re-invoke `/eco` after compaction.
 
-Use `/eco` as the everyday default — it kept full reasoning depth and found the same exotic edge case the unrestricted baseline found. Use `/eco-max` for renames, small fixes, boilerplate and lookups; it's instructed to tell you and recommend `/eco` if the task turns out hard.
+Use `/eco` as the everyday default — it kept full reasoning depth and found the same exotic edge case the unrestricted baseline found. Use `/eco-max` for renames, small fixes, boilerplate and lookups; it's instructed to tell you and recommend `/eco` if the task turns out hard. Note that its effort override applies per-invocation and effort is part of the prompt-cache key — so calling `/eco-max` mid-way through a long, heavily-cached session can cost a cache rebuild. Best at session start or in short sessions.
 
 ## Across models
 
@@ -103,7 +106,7 @@ Anthropic shipped a hard "≤100 words" cap in the Claude Code system prompt on 
 
 ## Squeeze further
 
-The biggest lever on effort-based Claude models (Fable 5, Sonnet 5, Opus 4.8) is the **reasoning effort level**: Anthropic measured medium effort matching a peer model's quality with 76% fewer output tokens. `/eco setup` proposes `"effortLevel": "medium"` persistently; `/eco-max` applies a per-task override. Pick effort at session start — mid-session switches invalidate the prompt cache. The full ranked list (cache hygiene, MCP schema debloat, subagent economics, CLAUDE.md diet) is in [docs/token-optimization-guide.md](docs/token-optimization-guide.md).
+The biggest lever on effort-based Claude models (Fable 5, Sonnet 5, Opus 4.8) is the **reasoning effort level**: on Opus 4.5, [Anthropic measured](https://www.anthropic.com/news/claude-opus-4-5) medium effort matching a peer model's quality with 76% fewer output tokens. `/eco setup` proposes `"effortLevel": "medium"` persistently; `/eco-max` applies a per-task override. Pick effort at session start — mid-session switches invalidate the prompt cache. The full ranked list (cache hygiene, MCP schema debloat, subagent economics, CLAUDE.md diet) is in [docs/token-optimization-guide.md](docs/token-optimization-guide.md).
 
 ## Related projects
 
@@ -125,15 +128,15 @@ What claude-eco adds that none of the above have: the reasoning-effort lever, ag
 
 **What does this do to my actual bill?** Output tokens are only part of a Claude Code bill — input/context often dominates. That's why we report cost, not just tokens: −21% to −46% measured total cost per task, because eco also cuts the input side (~40% fewer read-tokens in the multi-turn test via grep-first reading) and fewer turns mean fewer full-context passes. Your split depends on cache configuration; the raw JSONs itemize both sides.
 
-**Does it make Claude dumber?** `/eco` — no; it makes Claude quieter. It found every planted bug and produced functionally identical, test-passing fixes. `/eco-max` *does* lower reasoning effort — opt-in, per task, labeled.
+**Does it make Claude dumber?** `/eco` — no; it makes Claude quieter. It found every planted bug and produced functionally identical, test-passing fixes. One real tradeoff we noticed and fixed: early versions also suppressed *useful* unsolicited observations (like a crash bug spotted while answering an unrelated question), so the quality floor now explicitly requires correctness-critical findings to be flagged in one line even when unasked — suppress noise, never warnings. `/eco-max` *does* lower reasoning effort — opt-in, per task, labeled.
 
 **Why "built for Fable 5"?** Because that's the hungriest configuration that exists: every core benchmark ran on `claude-fable-5` at **max** effort, so the numbers reflect the worst case, not a cherry-picked easy one.
 
-**Other models?** Measured: −48% on Opus 4.8, −52% on Sonnet 5, −52% to −75% on Fable 5. The exception is Haiku (+16%, skip it) — see [Across models](#across-models).
+**Other models?** Measured with `/eco`: −48% on Opus 4.8, −52% on Sonnet 5, −52% to −73% on Fable 5 (the −75% figure is `/eco-max`, which lowers effort). The exception is Haiku (+16%, skip it) — see [Across models](#across-models).
 
-**How much do the skills themselves cost?** ~60 tokens of description each at session start, plus ~1.1k tokens of body once per session when invoked (then cached).
+**How much do the skills themselves cost?** ~1.2k input tokens once per session when invoked (skill body plus the two ~60-token descriptions loaded at startup), cached afterwards. Same number as in Usage above — it's why activating for one trivial question isn't worth it.
 
-**Can a skill reduce thinking tokens?** Softly at best via instructions — on adaptive-reasoning models like Fable 5, thinking follows the effort setting (`MAX_THINKING_TOKENS` is ignored). That's exactly why `/eco-max` overrides effort via skill frontmatter and `setup` proposes a persistent `effortLevel`.
+**Can a skill reduce thinking tokens?** Softly at best via instructions — on adaptive-reasoning models like Fable 5, thinking follows the effort setting and `MAX_THINKING_TOKENS` is ignored ([model config docs](https://code.claude.com/docs/en/model-config)). That's exactly why `/eco-max` overrides effort via skill frontmatter and `setup` proposes a persistent `effortLevel`.
 
 **What can't it fix?** The fixed session overhead (system prompt, tool schemas), MCP schema bloat, and your CLAUDE.md size — the [guide](docs/token-optimization-guide.md) covers those levers.
 

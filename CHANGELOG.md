@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 — 2026-07-02
+
+- **Quality floor upgrade:** correctness-critical findings (crash, data loss, security) must now be flagged in one line even when unasked — "suppress noise, never warnings." Verified: the trivial-question demo now carries the crash warning at half the baseline's answer size.
+- **n=5 variance study** on the flagship review task: −63% mean output tokens (range −54% to −67%), both planted bugs found in 10/10 runs across both arms; volunteered-depth tradeoff documented honestly.
+- Consistency fixes from external review: headline ranges now separate /eco from /eco-max; planted-vs-unplanted bug counts disclosed per arm; /eco-max's cache-key interaction documented; activation-cost number unified (~1.2k); compaction re-invoke caveat; uninstall instructions; sources added for all Anthropic claims; release tag re-pointed at a reachable commit.
+
 ## 1.0.0 — 2026-07-02
 
 Initial public release.
