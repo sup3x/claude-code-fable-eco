@@ -2,9 +2,9 @@
 
 ## 1.1.0 — 2026-07-02
 
-- **Quality floor upgrade:** correctness-critical findings (crash, data loss, security) must now be flagged in one line even when unasked — "suppress noise, never warnings." Verified: the trivial-question demo now carries the crash warning at half the baseline's answer size.
-- **n=5 variance study** on the flagship review task: −63% mean output tokens (range −54% to −67%), both planted bugs found in 10/10 runs across both arms; volunteered-depth tradeoff documented honestly.
-- Consistency fixes from external review: headline ranges now separate /eco from /eco-max; planted-vs-unplanted bug counts disclosed per arm; /eco-max's cache-key interaction documented; activation-cost number unified (~1.2k); compaction re-invoke caveat; uninstall instructions; sources added for all Anthropic claims; release tag re-pointed at a reachable commit.
+- **Quality floor upgrade:** correctness-critical findings (crash, data loss, security) must now be flagged in one line even when unasked — "suppress noise, never warnings." Scope measured honestly: a 12-run warning-rate study shows this is a guarantee about *reporting* what gets noticed, and out-of-scope issues rarely get noticed by either arm on tasks that don't ask for review (baseline 1/5, eco 1/6).
+- **n=5 variance study** on the flagship review task: −63% mean output tokens (arm spreads ±6%/±11%), both planted bugs found in 10/10 runs across both arms; volunteered-depth tradeoff documented honestly.
+- Consistency fixes from external review: every benchmark row now labeled with effort level and skill version; headline ranges separate /eco from /eco-max; planted-vs-unplanted bug counts disclosed per arm; /eco-max's cache-key interaction documented; activation-cost number unified (~1.2k); compaction re-invoke caveat; uninstall instructions; sources added for all Anthropic claims; release tag re-pointed at a reachable commit. 45 raw run JSONs, each mapped to its configuration in benchmarks/results.md.
 
 ## 1.0.0 — 2026-07-02
 

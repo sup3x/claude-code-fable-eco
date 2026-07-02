@@ -63,7 +63,18 @@ Run after the v1.1 skill update (adds the "flag correctness-critical findings ev
 | Baseline | 937, 824, 894, 933, 866 | **891** | 824–937 | 5/5 both found | 5/5 found |
 | /eco | 316, 310, 380, 314, 318 | **328** | 310–380 | 5/5 both found | 0/5 found |
 
-**Savings: −63% mean, worst-case pairing −54%, best −67%.** Consistency is the point: every single run of both arms found both planted bugs; the spread within each arm (±6% baseline, ±11% eco) is far smaller than the gap between arms. The honest nuance: at this effort level the baseline reliably volunteers the unplanted edge case and eco reliably doesn't — volunteered depth is what the token savings buy. When such an observation is correctness-critical, the v1.1 quality floor requires eco to flag it in one line (verified on the trivial-question task, `raw/triv2.json`).
+**Savings: −63% (ratio of arm means, 328 / 891).** Runs are not paired, so we report each arm's own spread instead of cross-arm extremes: baseline 891 ± 6% (824–937), eco 328 ± 11% (310–380). Consistency is the point: every single run of both arms found both planted bugs; the spread within each arm is far smaller than the gap between arms. The honest nuance: at this effort level the baseline reliably volunteers the unplanted edge case and eco reliably doesn't — volunteered depth is what the token savings buy. When such an observation is correctness-critical, the v1.1 quality floor requires eco to flag it in one line (verified on the trivial-question task, `raw/triv2.json`).
+
+## Task 7 — Warning-rate study, n=5 per arm (trivial question, default effort, v1.1)
+
+Question: does the v1.1 "keep unasked critical warnings" clause fire in practice? Task: the trivial `applyDiscount` question from Task 3, which never asks for a review; the fixture's crash bug sits in an adjacent function.
+
+| Arm | Volunteered the unrelated crash bug | Runs |
+|---|---|---|
+| Baseline | **1/5** (`wb_4`) | `wb_1..5` |
+| /eco v1.1 | **1/6** (`triv2`; 0/5 in `we_1..5`) | `we_1..5`, `triv2` |
+
+**Honest interpretation:** at default effort, *neither* arm reliably notices out-of-scope issues on a task that doesn't ask for review — the earlier demo pair where eco carried the warning was a real but lucky draw, so we report the rates next to it. The v1.1 clause is a guarantee about **reporting what gets noticed** (verified: when the bug was noticed, it was flagged in one line), not a guarantee of noticing — and eco's grep-first targeted reading makes out-of-scope noticing *less* likely by design. If you want issues found, ask for a review: on the explicit review task, detection was 10/10 across both arms (Task 6).
 
 ## Task 5 — Cross-model check (same review task as Task 1)
 
@@ -80,12 +91,12 @@ The Haiku row is a **negative result and we're keeping it**: Haiku's baseline is
 
 ## Methodology & caveats
 
-- **Most cells are n = 1** (single-shot runs; treat percentages as effect sizes, not lab constants) — except the flagship review task, which has a dedicated n=5-per-arm variance study (Task 6). The direction and rough magnitude were consistent across all 35 runs (Haiku being the honest exception, documented above).
+- **Most cells are n = 1** (single-shot runs; treat percentages as effect sizes, not lab constants) — except the flagship review task (n=5 per arm, Task 6) and the warning-rate study (n=5 per arm, Task 7). The direction and rough magnitude were consistent across all 45 runs (Haiku being the honest exception, documented above).
 - Several arms ran **in parallel**, which races prompt-cache population between processes — `total_cost_usd` is therefore noisier than `output_tokens` (which is unaffected). The [run scripts](run.ps1) execute arms sequentially for cleaner cost numbers.
 - One-shot sessions carry a fixed overhead (~45–50k cached input tokens: system prompt, tools, skill descriptions) that dominates single-run cost. In real multi-turn sessions the per-turn output savings compound while the fixed overhead amortizes — the percentages above are conservative for long sessions.
 - Auto-memory was disabled during all v2 runs (headless mode loads project memory by default, which would have contaminated both arms).
 - Bug-finding quality was graded against the 2 planted bugs; the exotic third issue is a max-effort bonus, and losing it at low effort is the documented eco-max tradeoff.
-- Naming: all runs predate the `token-saver` → `claude-eco` rename, so raw JSONs show `/token-saver` (now `/eco`) and `/token-saver-eco` (now `/eco-max`) invocations. Rule content is identical; only titles and self-references changed, and post-rename loading was re-verified.
+- **Raw-file → configuration map.** `baseline, skill, skill_medium, skill_final, e2, tb, ts, fb, fs, pr, eco` = v1.0 rules at max effort, invoked under the pre-release name `/token-saver` (the rename changed titles and self-references only; post-rename loading was re-verified). `big_b*, big_s*` = v1.0 rules (with the large-repo additions), max effort. `mm_*` = v1.0 rules, each model at its then-default effort. `nb_*, ne_*, triv2, trivb2, wb_*, we_*` = **v1.1 rules** (adds the keep-unasked-critical-warnings clause), default effort. The v1.1 clause is inert on tasks that explicitly request bug-finding; the surface it changes is measured in the warning-rate study.
 
 ## Reproduce
 

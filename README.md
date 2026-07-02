@@ -1,14 +1,14 @@
 # claude-eco — eco mode for Claude Code, built for Claude Fable 5
 
-**Your Claude Code sessions are full of work you never asked for. I measured it, deleted it, and published every number — including the one where I lose.**
+**Your Claude Code sessions are full of work you never asked for. I measured it, deleted it, and published every number — including the ones where I lose.**
 
 *`/eco`: −48% to −73% output tokens at full quality (all produced fixes executed and verified). `/eco-max`: up to −75% by dialing reasoning effort down — opt-in, labeled. Raw data in the repo.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)](https://code.claude.com/docs/en/skills) [![Benchmarks](https://img.shields.io/badge/benchmarks-35%20raw%20runs-success)](benchmarks/results.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)](https://code.claude.com/docs/en/skills) [![Benchmarks](https://img.shields.io/badge/benchmarks-45%20raw%20runs-success)](benchmarks/results.md)
 
 [Results](#measured-results) · [Install](#install) · [Usage](#usage) · [Benchmarks](benchmarks/results.md) · [FAQ](#faq)
 
-![Same answer, 220 vs 79 output tokens — measured −52% to −75% across real tasks](assets/social-preview.png)
+![Same answer at half the tokens, critical warning kept — /eco −48% to −73% at full quality, /eco-max up to −75%](assets/social-preview.png)
 
 Fable 5 at high effort re-reads files it just edited, pastes back diffs it already applied, and writes reports nobody asked for — and every one of those tokens burns your usage window or your API bill. **claude-eco** ships two skills:
 
@@ -31,21 +31,23 @@ Same question, identical settings, paired runs — `what does applyDiscount(100,
 >
 > Unrelated bug noticed: `calcTotal` loops `i <= items.length` (test/orders.js:5), so it reads past the array and throws on `items[i].price`.
 
-Half the tokens — and in this pair it's the *eco* answer carrying a critical warning, because the quality floor requires correctness-critical findings to be flagged in one line even when unasked. Suppress noise, never warnings. Individual runs vary (that's what the n=5 row below is for); the ratio is what holds.
+Half the tokens — and in this pair it's the *eco* answer carrying a critical warning. **How typical is that pair?** We measured instead of guessing: across repeated runs of this question at default effort, the unrelated bug got volunteered in **1/5 baseline runs and 1/6 eco runs** — neither arm reliably notices out-of-scope issues on a question that never asked for a review. The quality floor guarantees that *noticed* critical findings are reported in one line (suppress noise, never warnings); it cannot guarantee noticing. Want the bug found? Ask for a review — that's the n=5 row below, where detection was 10/10.
 
 ## Measured results
 
-Baseline = stock Claude Code, `claude-fable-5`, **max** effort, no CLAUDE.md, default system prompt. The eco arm differs only by the skill invocation.
+Baseline = stock Claude Code, `claude-fable-5`, no CLAUDE.md, default system prompt; the eco arm differs only by the skill invocation. **Each row is labeled with its effort level and the skill version that produced it.** The one behavioral change in v1.1 (keep unasked critical warnings) is inert on tasks that explicitly request bug-finding — i.e. every row below — and the surface it *does* change was re-measured separately (warning-rate study, next section).
 
-| Task | Baseline | With /eco | Output tokens | Cost | Quality |
+| Task (effort · skill) | Baseline | With /eco | Output tokens | Cost | Quality |
 |---|---:|---:|---:|---:|---|
-| Code review (find bugs) | 1,096 tok | 531 tok | **−52%** | −21% | Both arms found all 3 issues (2 planted + 1 unplanted) — full parity |
-| Real editing (fix bugs) | 3,776 tok | 1,026 tok | **−73%** | −46% | Fixes verified functionally identical with Node |
-| Multi-file project, 3-turn session | 11,912 tok | 3,285 tok | **−72%** | −46% | Same root cause, same fix, tests pass |
-| Code review with /eco-max | 1,096 tok | 279 tok | **−75%** | −30% | 2/2 planted bugs; missed the 1 unplanted edge case — that's the effort tradeoff, and it's why eco-max is opt-in |
-| **Code review, n=5 variance study** (default effort) | 891 mean (824–937) | 328 mean (310–380) | **−63%** (−54% to −67%) | — | 5/5 runs: both planted bugs found by both arms. The unplanted bonus issue: baseline 5/5, eco 0/5 — volunteered depth is precisely what you trade |
+| Code review (max · v1.0) | 1,096 tok | 531 tok | **−52%** | −21% | Single run: both arms found all 3 issues (2 planted + 1 unplanted). At default effort the picture differs — see the n=5 row |
+| Real editing (max · v1.0) | 3,776 tok | 1,026 tok | **−73%** | −46% | Fixes verified functionally identical with Node |
+| Multi-file project, 3-turn session (max · v1.0) | 11,912 tok | 3,285 tok | **−72%** | −46% | Same root cause, same fix, tests pass |
+| Code review with /eco-max (max · v1.0) | 1,096 tok | 279 tok | **−75%** | −30% | 2/2 planted bugs; missed the 1 unplanted edge case — that's the effort tradeoff, and it's why eco-max is opt-in |
+| **Code review, n=5 per arm (default effort · v1.1)** | 891 mean (824–937) | 328 mean (310–380) | **−63% mean** | −12% mean | 10/10 runs found both planted bugs. The unplanted *non-critical* nitpick: baseline 5/5, eco 0/5 — by design; correctness-critical findings are exempt (measured below) |
 
-Don't take the table's word for it — run the same A/B on **your** task: `./benchmarks/run.sh "your task here"`. Full methodology, grading criteria, per-turn numbers and 35 raw JSONs: [benchmarks/results.md](benchmarks/results.md). The multi-turn row is the scale test: a 12-file codebase, one invocation in turn 1, and the mode held for the whole session while input-side reads dropped ~40%.
+Note the n=5 row uses a different effort level than the single-run rows, so its baseline (891) is not comparable to theirs (1,096) — that's an effort difference, not variance.
+
+Don't take the table's word for it — run the same A/B on **your** task: `./benchmarks/run.sh "your task here"`. Full methodology, grading criteria, per-turn numbers and 45 raw JSONs: [benchmarks/results.md](benchmarks/results.md). The multi-turn row is the scale test: a 12-file codebase, one invocation in turn 1, and the mode held for the whole session while input-side reads dropped ~40%.
 
 ## Install
 
@@ -80,7 +82,7 @@ git clone https://github.com/sup3x/claude-code-fable-eco; cd claude-code-fable-e
 
 Works in **any language** — the rules are English, the replies follow yours. No slash commands available (mobile app, web)? Just say it in plain words — "activate eco mode" triggers the skill (verified in English and Turkish). **Invoke once per session, not per question:** activation costs one turn plus ~1.2k input tokens once per session (skill body + descriptions, then cached), so for a single trivial question the overhead exceeds the savings (we measured that too). Activated early, every subsequent answer is ~2–4× smaller. One more honest caveat: if a very long session gets context-compacted, the rules may be summarized away — re-invoke `/eco` after compaction.
 
-Use `/eco` as the everyday default — it kept full reasoning depth and found the same exotic edge case the unrestricted baseline found. Use `/eco-max` for renames, small fixes, boilerplate and lookups; it's instructed to tell you and recommend `/eco` if the task turns out hard. Note that its effort override applies per-invocation and effort is part of the prompt-cache key — so calling `/eco-max` mid-way through a long, heavily-cached session can cost a cache rebuild. Best at session start or in short sessions.
+Use `/eco` as the everyday default — full reasoning depth on what you ask for. What it stops doing is volunteering *non-critical* extras: in the max-effort single run it matched the baseline's bonus finding, but the default-effort n=5 study shows the honest steady state (baseline volunteers an unplanted nitpick 5/5, eco 0/5) — while correctness-critical warnings stay protected by the quality floor. Use `/eco-max` for renames, small fixes, boilerplate and lookups; it's instructed to tell you and recommend `/eco` if the task turns out hard. Note that its effort override applies per-invocation and effort is part of the prompt-cache key — so calling `/eco-max` mid-way through a long, heavily-cached session can cost a cache rebuild. Best at session start or in short sessions.
 
 ## Across models
 
@@ -128,7 +130,7 @@ What claude-eco adds that none of the above have: the reasoning-effort lever, ag
 
 **What does this do to my actual bill?** Output tokens are only part of a Claude Code bill — input/context often dominates. That's why we report cost, not just tokens: −21% to −46% measured total cost per task, because eco also cuts the input side (~40% fewer read-tokens in the multi-turn test via grep-first reading) and fewer turns mean fewer full-context passes. Your split depends on cache configuration; the raw JSONs itemize both sides.
 
-**Does it make Claude dumber?** `/eco` — no; it makes Claude quieter. It found every planted bug and produced functionally identical, test-passing fixes. One real tradeoff we noticed and fixed: early versions also suppressed *useful* unsolicited observations (like a crash bug spotted while answering an unrelated question), so the quality floor now explicitly requires correctness-critical findings to be flagged in one line even when unasked — suppress noise, never warnings. `/eco-max` *does* lower reasoning effort — opt-in, per task, labeled.
+**Does it make Claude dumber?** `/eco` — no; it makes Claude quieter. In the v1.0 max-effort benchmarks it found every planted bug and produced functionally identical, test-passing fixes; the v1.1 n=5 study confirms 10/10 planted-bug consistency at default effort. One real tradeoff we noticed and addressed: early versions also suppressed *useful* unsolicited observations, so the v1.1 quality floor explicitly requires correctness-critical findings to be flagged in one line even when unasked — suppress noise, never warnings. Honest scope note: that's a guarantee about *reporting* what gets noticed, not about noticing — the warning-rate study in [benchmarks/results.md](benchmarks/results.md) shows out-of-scope issues rarely get noticed by either arm on tasks that don't ask for review. `/eco-max` *does* lower reasoning effort — opt-in, per task, labeled.
 
 **Why "built for Fable 5"?** Because that's the hungriest configuration that exists: every core benchmark ran on `claude-fable-5` at **max** effort, so the numbers reflect the worst case, not a cherry-picked easy one.
 
