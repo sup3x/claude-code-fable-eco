@@ -33,7 +33,7 @@ Same outcomes, minimum tokens. Cut verbosity and waste — never correctness. If
 
 ## Setup (only via `/eco setup` or explicit user request)
 Propose the following, show the exact diff, apply only after the user confirms — in `~/.claude/settings.json`:
-- `"effortLevel": "medium"` — the biggest saver on Claude 5 models (Anthropic measured medium effort matching a peer model's quality with 76% fewer output tokens). Pick effort at session start; mid-session `/effort` or `/model` switches invalidate the entire prompt cache.
+- `"effortLevel": "medium"` — the biggest saver on effort-based Claude models like Fable 5 (Anthropic measured medium effort matching a peer model's quality with 76% fewer output tokens). Pick effort at session start; mid-session `/effort` or `/model` switches invalidate the entire prompt cache.
 - `"env": { "MAX_MCP_OUTPUT_TOKENS": "10000", "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1" }`
 Then remind briefly: keep CLAUDE.md under 200 lines; `/clear` between unrelated tasks; prefer `/rewind` over `/compact` when abandoning a path; disable unused MCP servers (CLI tools like gh/aws/gcloud cost nothing); audit real usage with `/usage` and `/context`; API-key users can set `ENABLE_PROMPT_CACHING_1H=1`.
 

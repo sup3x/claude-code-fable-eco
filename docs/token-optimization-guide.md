@@ -6,9 +6,9 @@ Every lever that actually reduces token consumption in Claude Code, ranked by me
 
 ---
 
-## 1. Reasoning effort — THE output-token lever on Claude 5 models (BIG)
+## 1. Reasoning effort — THE output-token lever on modern Claude models (BIG)
 
-Claude 5 family models (Fable 5, Sonnet 5, Opus 4.7/4.8) use **adaptive reasoning**. The effort level controls how much thinking *and* output the model produces — including how many tool calls it makes. On these models `MAX_THINKING_TOKENS` is **ignored** and thinking **cannot be disabled**.
+The Claude 5 family (Fable 5, Sonnet 5) and Opus 4.7/4.8 use **adaptive reasoning**. The effort level controls how much thinking *and* output the model produces — including how many tool calls it makes. On these models `MAX_THINKING_TOKENS` is **ignored** and thinking **cannot be disabled**.
 
 - Anthropic's measurement (Opus 4.5): `medium` effort matched Sonnet 4.5's SWE-bench score with **76% fewer output tokens**; `high` beat it by 4.3 points with 48% fewer tokens.
 - Levels: `low` / `medium` / `high` (default) / `xhigh` / `max`. Official docs describe `max` as "prone to overthinking" — you pay for every thinking token even when it's collapsed in the UI.

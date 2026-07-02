@@ -13,7 +13,7 @@
 Fable 5 at high effort re-reads files it just edited, pastes back diffs it already applied, and writes reports nobody asked for — and every one of those tokens burns your usage window or your API bill. **claude-eco** ships two skills:
 
 - **`/eco`** — frugality rules with a non-negotiable quality floor. Full reasoning depth preserved.
-- **`/eco-max`** — the same rules plus a **low reasoning-effort override** for routine chores. Effort is the single biggest token lever on Claude 5 models, and of every terse-mode tool we surveyed, this is the only one we found that touches it.
+- **`/eco-max`** — the same rules plus a **low reasoning-effort override** for routine chores. Effort is the single biggest token lever on modern Claude models (Fable 5, Sonnet 5, Opus 4.8), and of every terse-mode tool we surveyed, this is the only one we found that touches it.
 
 ## See the difference
 
@@ -103,7 +103,7 @@ Anthropic shipped a hard "≤100 words" cap in the Claude Code system prompt on 
 
 ## Squeeze further
 
-The biggest lever on Claude 5 models is the **reasoning effort level**: Anthropic measured medium effort matching a peer model's quality with 76% fewer output tokens. `/eco setup` proposes `"effortLevel": "medium"` persistently; `/eco-max` applies a per-task override. Pick effort at session start — mid-session switches invalidate the prompt cache. The full ranked list (cache hygiene, MCP schema debloat, subagent economics, CLAUDE.md diet) is in [docs/token-optimization-guide.md](docs/token-optimization-guide.md).
+The biggest lever on effort-based Claude models (Fable 5, Sonnet 5, Opus 4.8) is the **reasoning effort level**: Anthropic measured medium effort matching a peer model's quality with 76% fewer output tokens. `/eco setup` proposes `"effortLevel": "medium"` persistently; `/eco-max` applies a per-task override. Pick effort at session start — mid-session switches invalidate the prompt cache. The full ranked list (cache hygiene, MCP schema debloat, subagent economics, CLAUDE.md diet) is in [docs/token-optimization-guide.md](docs/token-optimization-guide.md).
 
 ## Related projects
 
@@ -133,7 +133,7 @@ What claude-eco adds that none of the above have: the reasoning-effort lever, ag
 
 **How much do the skills themselves cost?** ~60 tokens of description each at session start, plus ~1.1k tokens of body once per session when invoked (then cached).
 
-**Can a skill reduce thinking tokens?** Softly at best via instructions — on Claude 5, thinking follows the effort setting (`MAX_THINKING_TOKENS` is ignored). That's exactly why `/eco-max` overrides effort via skill frontmatter and `setup` proposes a persistent `effortLevel`.
+**Can a skill reduce thinking tokens?** Softly at best via instructions — on adaptive-reasoning models like Fable 5, thinking follows the effort setting (`MAX_THINKING_TOKENS` is ignored). That's exactly why `/eco-max` overrides effort via skill frontmatter and `setup` proposes a persistent `effortLevel`.
 
 **What can't it fix?** The fixed session overhead (system prompt, tool schemas), MCP schema bloat, and your CLAUDE.md size — the [guide](docs/token-optimization-guide.md) covers those levers.
 
