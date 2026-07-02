@@ -75,7 +75,7 @@ git clone https://github.com/sup3x/claude-code-fable-eco; cd claude-code-fable-e
 | `/eco-max <task>` | Maximum savings: frugality rules **plus** low reasoning effort — for routine chores |
 | `/eco setup` | Propose permanent savings in `settings.json` — applies only after you confirm |
 
-Works in **any language** — the rules are English, the replies follow yours. **Invoke once per session, not per question:** activation costs one turn plus ~1.3k cached input tokens, so for a single trivial question the overhead exceeds the savings (we measured that too). Activated early, every subsequent answer is ~3× smaller.
+Works in **any language** — the rules are English, the replies follow yours. No slash commands available (mobile app, web)? Just say it in plain words — "activate eco mode" in any language triggers the skill; verified. **Invoke once per session, not per question:** activation costs one turn plus ~1.3k cached input tokens, so for a single trivial question the overhead exceeds the savings (we measured that too). Activated early, every subsequent answer is ~3× smaller.
 
 Use `/eco` as the everyday default — it kept full reasoning depth and found the same exotic edge case the unrestricted baseline found. Use `/eco-max` for renames, small fixes, boilerplate and lookups; it's instructed to tell you and recommend `/eco` if the task turns out hard.
 
