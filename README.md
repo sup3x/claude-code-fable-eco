@@ -1,8 +1,8 @@
 # claude-eco — eco mode for Claude Code
 
-**Your Claude Code sessions are full of work you never asked for. I measured it, deleted it, and published every number — including the ones where I lose.**
+**Claude Code spends your money on work you never asked for: re-reading files it just edited, pasting back diffs it already applied, writing three-paragraph reports for two-line fixes. I measured every token of it, deleted it, and published all 82 raw runs — including the ones where I lose.**
 
-*Measured hardest on Claude Fable 5, tuned for every effort-based Claude. `/eco`: −31% to −73% output tokens depending on task and effort level (−63% mean on the flagship n=5 study), with critical findings intact and all produced fixes executed and verified. `/eco-max`: up to −75% by dialing reasoning effort down — opt-in, labeled. Raw data in the repo.*
+*Measured hardest on Claude Fable 5 — the hungriest configuration that ever existed — and tuned for every effort-based Claude. `/eco`: −31% to −73% output tokens depending on task and effort level (−63% mean on the flagship n=5 study), with critical findings intact and all produced fixes executed and verified. `/eco-max`: up to −75% by dialing reasoning effort down — opt-in, labeled.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill%20%2B%20plugin-blueviolet)](https://code.claude.com/docs/en/skills) [![Benchmarks](https://img.shields.io/badge/benchmarks-82%20raw%20runs-success)](benchmarks/results.md)
 
@@ -10,14 +10,16 @@
 
 ![Same answer at half the tokens — /eco −31% to −73% depending on task and effort, critical findings intact; /eco-max up to −75%](assets/social-preview.png)
 
-Fable 5 at high effort re-reads files it just edited, pastes back diffs it already applied, and writes reports nobody asked for — and every one of those tokens burns your usage window or your API bill. **claude-eco** ships two skills:
+The waste isn't occasional — it repeats on **every turn of every session**, which is why usage limits evaporate and API bills surprise you. **claude-eco** deletes it with two skills:
 
 - **`/eco`** — frugality rules with a non-negotiable quality floor. Full reasoning depth preserved.
 - **`/eco-max`** — the same rules plus a **low reasoning-effort override** for routine chores. Effort is the single biggest token lever on modern Claude models (Fable 5, Sonnet 5, Opus 4.8), and of every terse-mode tool we surveyed, this is the only one we found that touches it.
 
+**What that means in practice:** verbose answers shrink 2–4×, replies come back up to 3× faster (30s → 10–15s, measured), and the same weekly limit simply lasts longer — same model, same fixes, minus the padding.
+
 ## See the difference
 
-One real pair — shown for illustration, **excluded from the study statistics below** — same question, identical settings: `what does applyDiscount(100, 'SAVE10') return?` Verbatim answers ([raw JSONs](benchmarks/raw/)):
+Same question. Same correct answer. Half the tokens — and the critical warning kept. One real pair, shown for illustration and **excluded from the study statistics below** (`what does applyDiscount(100, 'SAVE10') return?`; verbatim, [raw JSONs](benchmarks/raw/)):
 
 **Without eco** (231-token answer):
 
