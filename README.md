@@ -64,7 +64,7 @@ git clone https://github.com/sup3x/claude-code-fable-eco && cd claude-code-fable
 git clone https://github.com/sup3x/claude-code-fable-eco; cd claude-code-fable-eco; .\install.ps1             # Windows
 ```
 
-**Project-only:** copy `skills/` into your repo's `.claude/skills/`.
+**Project-only:** copy `skills/` into your repo's `.claude/skills/`. This is also what makes `/eco` available in Claude Code **web/mobile cloud sessions** — those only load skills from the repo, not from `~/.claude/skills/`.
 
 ## Usage
 
