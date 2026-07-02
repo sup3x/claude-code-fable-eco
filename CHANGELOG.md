@@ -1,10 +1,19 @@
 # Changelog
 
+## 1.1.1 — 2026-07-02
+
+Measurement-hygiene release; no rule changes.
+
+- **Warning-rate study** (12 runs): on a task that never asks for review, the out-of-scope crash bug gets volunteered rarely by *either* arm (baseline 1/6, eco 1/6) — the demo pair where eco carried the warning was a real but lucky draw, and the README now says so next to it.
+- **Reporting-rate study** (5 runs): when noticing is forced (prompt requires reading the whole file), eco flagged the bug **5/5 times**, one line each — the v1.1 reporting guarantee is now measured, not asserted.
+- Every benchmark row labeled with effort level and skill version; run inventory added (50 raw JSONs, each mapped to its configuration); across-models table labeled; index-paired reduction range restored (−57% to −66%); cost range corrected to −12%…−46% with the default-effort explanation; FAQ claims re-scoped to their versions; v1.1 rule added to the feature list.
+- Versioning hygiene: the v1.1.0 tag had been moved after publication — it is re-pinned to its original commit, and this wave ships as 1.1.1.
+
 ## 1.1.0 — 2026-07-02
 
-- **Quality floor upgrade:** correctness-critical findings (crash, data loss, security) must now be flagged in one line even when unasked — "suppress noise, never warnings." Scope measured honestly: a 12-run warning-rate study shows this is a guarantee about *reporting* what gets noticed, and out-of-scope issues rarely get noticed by either arm on tasks that don't ask for review (baseline 1/5, eco 1/6).
-- **n=5 variance study** on the flagship review task: −63% mean output tokens (arm spreads ±6%/±11%), both planted bugs found in 10/10 runs across both arms; volunteered-depth tradeoff documented honestly.
-- Consistency fixes from external review: every benchmark row now labeled with effort level and skill version; headline ranges separate /eco from /eco-max; planted-vs-unplanted bug counts disclosed per arm; /eco-max's cache-key interaction documented; activation-cost number unified (~1.2k); compaction re-invoke caveat; uninstall instructions; sources added for all Anthropic claims; release tag re-pointed at a reachable commit. 45 raw run JSONs, each mapped to its configuration in benchmarks/results.md.
+- **Quality floor upgrade:** correctness-critical findings (crash, data loss, security) must now be flagged in one line even when unasked — "suppress noise, never warnings."
+- **n=5 variance study** on the flagship review task at default effort: −63% mean output tokens (arm spreads ±6%/±11%), both planted bugs found in 10/10 runs across both arms; the volunteered-depth tradeoff documented honestly (baseline surfaced an unplanted nitpick 5/5, eco 0/5).
+- Consistency fixes from external review: headline ranges separate /eco from /eco-max; planted-vs-unplanted bug counts disclosed per arm; /eco-max's cache-key interaction documented; activation-cost number unified; compaction re-invoke caveat; uninstall instructions; sources added for Anthropic claims.
 
 ## 1.0.0 — 2026-07-02
 
@@ -13,6 +22,6 @@ Initial public release.
 - **`/eco`** — frugality rules with a non-negotiable quality floor: answer-first replies, no paste-backs of applied diffs, grep-first targeted reads, Edit-over-Write, batched tool calls, cheap Haiku delegation for broad sweeps, no unprompted progress recaps. Persists for the whole session from one invocation. Replies in the user's language.
 - **`/eco-max`** — the same rules **plus** a low reasoning-effort override via skill frontmatter, for routine chores. Instructed to escalate honestly to `/eco` when a task turns out hard.
 - **`/eco setup`** — proposes persistent savings in `settings.json` (`effortLevel: medium`, MCP output caps); applies only after explicit confirmation.
-- **Benchmarks** — 23 headless runs across five task types (review, real edits, trivial question, multi-file 3-turn session, cross-model check on Opus/Sonnet/Haiku), raw JSONs included. Result: −48% to −75% output tokens at graded quality parity on frontier models, with fixes executed and verified — plus one published negative result (Haiku).
+- **Benchmarks** — headless runs across five task types (review, real edits, trivial question, multi-file 3-turn session, cross-model check on Opus/Sonnet/Haiku), raw JSONs included. Result: −48% to −75% output tokens at graded quality parity on frontier models, with fixes executed and verified — plus one published negative result (Haiku).
 - **Harness** — `benchmarks/run.ps1` / `benchmarks/run.sh` for one-command A/B measurement of your own workload.
 - **Guide** — `docs/token-optimization-guide.md`: every known token lever in Claude Code, ranked, with sources.
